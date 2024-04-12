@@ -37,7 +37,6 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
         [IgnoreDataMember]
         public List<Schema> CustomReplacers { get; set; }
         [IgnoreDataMember]
-        public Model CustomPropertyReplacers { get; set; }
         public string DefaultDacpacSchema { get; set; }
         public bool UseLegacyPluralizer { get; set; }
         public bool UseSpatial { get; set; }
@@ -60,5 +59,6 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
         public bool UseDateOnlyTimeOnly { get; set; }
         public string T4TemplatePath { get; set; }
         public bool UseDecimalDataAnnotationForSprocResult { get; set; } = true;
+        public bool UsePrefixNavigationNaming { get; set; }
     }
 }

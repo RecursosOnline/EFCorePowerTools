@@ -2,13 +2,12 @@
 using System.Runtime.Serialization.Json;
 using System.Text;
 using EFCorePowerTools.Handlers.ReverseEngineer;
-using EFCorePowerTools.Helpers;
 
 namespace EFCorePowerTools.Extensions
 {
     internal static class ReverseEngineerOptionsExtensions
     {
-        public static ReverseEngineerOptions TryRead(string optionsPath, string projectDirectory)
+        public static ReverseEngineerOptions TryRead(string optionsPath)
         {
             if (!File.Exists(optionsPath))
             {
@@ -23,25 +22,15 @@ namespace EFCorePowerTools.Extensions
             var couldRead = TryRead(optionsPath, out ReverseEngineerOptions deserialized);
             if (couldRead)
             {
-                if (!string.IsNullOrEmpty(deserialized.UiHint))
-                {
-                    deserialized.UiHint = SqlProjHelper.GetFullPathForSqlProj(deserialized.UiHint, projectDirectory);
-                }
-
                 return deserialized;
             }
 
             return null;
         }
 
-        public static string Write(this ReverseEngineerOptions options, string projectDirectory)
+        public static string Write(this ReverseEngineerOptions options)
         {
-            if (!string.IsNullOrEmpty(options.UiHint)
-                && (options.UiHint.EndsWith(".sqlproj", System.StringComparison.OrdinalIgnoreCase)
-                    || options.UiHint.EndsWith(".dacpac", System.StringComparison.OrdinalIgnoreCase)))
-            {
-                options.UiHint = SqlProjHelper.SetRelativePathForSqlProj(options.UiHint, projectDirectory);
-            }
+            options.UiHint = null;
 
             using (var ms = new MemoryStream())
             {

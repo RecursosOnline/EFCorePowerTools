@@ -69,17 +69,19 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             var options = new ReverseEngineerOptions
             {
                 Tables = new List<SerializationTableModel>(),
-                CodeGenerationMode = CodeGenerationMode.EFCore6,
+                CodeGenerationMode = CodeGenerationMode.EFCore8,
                 DatabaseType = DatabaseType.SQLServerDacpac,
                 UiHint = sqlProjectPath,
+                ProjectRootNamespace = await project.GetAttributeAsync("RootNamespace"),
+                OutputPath = "Models",
             };
 
-            await SaveOptionsAsync(project, optionsPath, options, new Tuple<List<Schema>, string>(null, null));
+            await SaveOptionsAsync(project, optionsPath, options, null, new Tuple<List<Schema>, string>(null, null));
 
             return (optionsPath, project);
         }
 
-        public async System.Threading.Tasks.Task ReverseEngineerCodeFirstAsync()
+        public async System.Threading.Tasks.Task ReverseEngineerCodeFirstAsync(string uiHint = null)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -121,7 +123,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     optionsPath = pickConfigResult.Payload.ConfigPath;
                 }
 
-                await ReverseEngineerCodeFirstAsync(project, optionsPath, false);
+                await ReverseEngineerCodeFirstAsync(project, optionsPath, false, false, uiHint);
             }
             catch (AggregateException ae)
             {
@@ -136,7 +138,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             }
         }
 
-        public async System.Threading.Tasks.Task ReverseEngineerCodeFirstAsync(Project project, string optionsPath, bool onlyGenerate, bool fromSqlProj = false)
+        public async System.Threading.Tasks.Task ReverseEngineerCodeFirstAsync(Project project, string optionsPath, bool onlyGenerate, bool fromSqlProj = false, string uiHint = null)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -150,10 +152,16 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
 
                 var renamingPath = project.GetRenamingPath(optionsPath);
                 var referenceRenamingPath = project.GetRenamingPath(optionsPath, true);
-                var namingOptionsAndPath = CustomNameOptionsExtensions.TryRead(renamingPath, optionsPath);
-                var propertyNamingModel = RenamingRulesSerializer.TryRead(referenceRenamingPath);
+                if (!string.IsNullOrEmpty(referenceRenamingPath) && File.Exists(referenceRenamingPath))
+                {
+                    VSHelper.ShowMessage("Property renaming (experimental) is no longer available. See GitHub issue #2171.");
+                }
 
-                var options = ReverseEngineerOptionsExtensions.TryRead(optionsPath, Path.GetDirectoryName(project.FullPath));
+                var namingOptionsAndPath = CustomNameOptionsExtensions.TryRead(renamingPath, optionsPath);
+
+                var options = ReverseEngineerOptionsExtensions.TryRead(optionsPath);
+
+                var userOptions = ReverseEngineerUserOptionsExtensions.TryRead(optionsPath, Path.GetDirectoryName(project.FullPath));
 
                 var newOptions = false;
 
@@ -166,6 +174,16 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     };
                     newOptions = true;
                 }
+
+                if (userOptions == null)
+                {
+                    userOptions = new ReverseEngineerUserOptions
+                    {
+                        UiHint = uiHint ?? options.UiHint,
+                    };
+                }
+
+                options.UiHint = uiHint ?? userOptions.UiHint;
 
                 legacyDiscoveryObjects = options.Tables?.Where(t => t.UseLegacyResultSetDiscovery).Select(t => t.Name).ToList() ?? new List<string>();
                 mappedTypes = options.Tables?
@@ -199,7 +217,6 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                         }
 
                         options.CustomReplacers = namingOptionsAndPath.Item1;
-                        options.CustomPropertyReplacers = propertyNamingModel;
                         options.InstallNuGetPackage = !onlyGenerate;
                     }
                 }
@@ -243,15 +260,13 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     neededPackages = await project.GetNeededPackagesAsync(options);
                     options.InstallNuGetPackage = neededPackages.Exists(p => p.DatabaseTypes.Contains(options.DatabaseType) && !p.Installed);
 
-                    options.CustomPropertyReplacers = propertyNamingModel;
-
                     if (!await GetModelOptionsAsync(options, project.Name))
                     {
                         await VS.StatusBar.ClearAsync();
                         return;
                     }
 
-                    await SaveOptionsAsync(project, optionsPath, options, new Tuple<List<Schema>, string>(options.CustomReplacers, namingOptionsAndPath.Item2));
+                    await SaveOptionsAsync(project, optionsPath, options, userOptions, new Tuple<List<Schema>, string>(options.CustomReplacers, namingOptionsAndPath.Item2));
                 }
 
                 await InstallNuGetPackagesAsync(project, onlyGenerate, options, forceEdit);
@@ -262,7 +277,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     missingProviderPackage = null;
                 }
 
-                await GenerateFilesAsync(project, options, missingProviderPackage, onlyGenerate, neededPackages, referenceRenamingPath);
+                await GenerateFilesAsync(project, options, missingProviderPackage, onlyGenerate, neededPackages);
 
                 var postRunFile = Path.Combine(Path.GetDirectoryName(optionsPath), "efpt.postrun.cmd");
                 if (File.Exists(postRunFile))
@@ -540,6 +555,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                 UseManyToManyEntity = options.UseManyToManyEntity,
                 UseDateOnlyTimeOnly = options.UseDateOnlyTimeOnly,
                 UseSchemaNamespaces = options.UseSchemaNamespaces,
+                T4TemplatePath = options.T4TemplatePath,
             };
 
             var modelDialog = package.GetView<IModelingOptionsDialog>()
@@ -592,11 +608,12 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             options.UseManyToManyEntity = modelingOptionsResult.Payload.UseManyToManyEntity;
             options.UseDateOnlyTimeOnly = modelingOptionsResult.Payload.UseDateOnlyTimeOnly;
             options.UseSchemaNamespaces = modelingOptionsResult.Payload.UseSchemaNamespaces;
+            options.T4TemplatePath = modelingOptionsResult.Payload.T4TemplatePath;
 
             return true;
         }
 
-        private async System.Threading.Tasks.Task GenerateFilesAsync(Project project, ReverseEngineerOptions options, string missingProviderPackage, bool onlyGenerate, List<NuGetPackage> packages, string referenceRenamingPath)
+        private async System.Threading.Tasks.Task GenerateFilesAsync(Project project, ReverseEngineerOptions options, string missingProviderPackage, bool onlyGenerate, List<NuGetPackage> packages)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -621,7 +638,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
 
             await VS.StatusBar.ShowProgressAsync(ReverseEngineerLocale.GeneratingCode, 2, 4);
 
-            var revEngResult = await EfRevEngLauncher.LaunchExternalRunnerAsync(options, options.CodeGenerationMode, project);
+            var revEngResult = await EfRevEngLauncher.LaunchExternalRunnerAsync(options, options.CodeGenerationMode);
 
             await VS.StatusBar.ShowProgressAsync(ReverseEngineerLocale.GeneratingCode, 3, 4);
 
@@ -669,8 +686,6 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
 
             await VS.StatusBar.ShowProgressAsync(ReverseEngineerLocale.GeneratingCode, 4, 4);
 
-            await ApplyNavigationRenamersAsync(project, referenceRenamingPath, options);
-
             stopWatch.Stop();
 
             var errors = reverseEngineerHelper.ReportRevEngErrors(revEngResult, missingProviderPackage);
@@ -693,39 +708,10 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             }
 
             Telemetry.TrackFrameworkUse(nameof(ReverseEngineerHandler), options.CodeGenerationMode);
-            Telemetry.TrackEngineUse(options.DatabaseType, revEngResult.DatabaseEdition, revEngResult.DatabaseVersion, revEngResult.DatabaseLevel);
+            Telemetry.TrackEngineUse(options.DatabaseType, revEngResult.DatabaseEdition, revEngResult.DatabaseVersion, revEngResult.DatabaseLevel, revEngResult.DatabaseEditionId);
         }
 
-        private async Task ApplyNavigationRenamersAsync(Project project, string referenceRenamingPath, ReverseEngineerOptions options)
-        {
-            if (File.Exists(referenceRenamingPath))
-            {
-                try
-                {
-                    var model = RenamingRulesSerializer.TryRead(referenceRenamingPath);
-
-                    if (!model?.Classes?.Any() ?? true)
-                    {
-                        return;
-                    }
-
-                    // navigation property renaming must be done after the project nuget packages are installed
-                    // because Roslyn will resolve the project references in order to identify property symbols
-                    var statusMessages = await RoslynEntityPropertyRenamer.ApplyRenamingRulesAsync(
-                        model,
-                        project.FullPath,
-                        options.OutputContextPath,
-                        options.OutputPath);
-                    package.LogError(statusMessages, null);
-                }
-                catch (Exception ex)
-                {
-                    package.LogError(new List<string>(), ex);
-                }
-            }
-        }
-
-        private async System.Threading.Tasks.Task SaveOptionsAsync(Project project, string optionsPath, ReverseEngineerOptions options, Tuple<List<Schema>, string> renamingOptions)
+        private async System.Threading.Tasks.Task SaveOptionsAsync(Project project, string optionsPath, ReverseEngineerOptions options,  ReverseEngineerUserOptions userOptions, Tuple<List<Schema>, string> renamingOptions)
         {
             if (File.Exists(optionsPath) && File.GetAttributes(optionsPath).HasFlag(FileAttributes.ReadOnly))
             {
@@ -735,10 +721,13 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
 
             if (!File.Exists(optionsPath + ".ignore"))
             {
-                if (!AdvancedOptions.Instance.IncludeUiHintInConfig)
+                if (userOptions != null)
                 {
-                    options.UiHint = null;
+                    userOptions.UiHint = options.UiHint;
+                    File.WriteAllText(optionsPath + ".user", userOptions.Write(Path.GetDirectoryName(project.FullPath)), Encoding.UTF8);
                 }
+
+                options.UiHint = null;
 
                 foreach (var table in options.Tables)
                 {
@@ -753,7 +742,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     }
                 }
 
-                File.WriteAllText(optionsPath, options.Write(Path.GetDirectoryName(project.FullPath)), Encoding.UTF8);
+                File.WriteAllText(optionsPath, options.Write(), Encoding.UTF8);
 
                 await project.AddExistingFilesAsync(new List<string> { optionsPath }.ToArray());
             }

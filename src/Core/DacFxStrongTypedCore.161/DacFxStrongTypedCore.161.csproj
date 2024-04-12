@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Microsoft.SqlServer.Dac.Extensions.Prototype</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants>TRACE;CORE70</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SqlServer.DacFx" Version="162.2.111" />
+  </ItemGroup>
+
+</Project>

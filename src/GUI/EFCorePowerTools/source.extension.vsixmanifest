@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="f4c4712c-ceae-4803-8e52-0e2049d5de9f" Version="2.5.0" Language="en-US" Publisher="ErikEJ" />
+        <Identity Id="f4c4712c-ceae-4803-8e52-0e2049d5de9f" Version="2.6.0" Language="en-US" Publisher="ErikEJ" />
         <DisplayName>EF Core Power Tools</DisplayName>
         <Description xml:space="preserve">Useful design-time DbContext features, added to the Visual Studio Solution Explorer context menu.
 
@@ -31,7 +31,7 @@ About - Displays version and other diagnostic information about your Visual Stud
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,)" DisplayName="Visual Studio core editor" />
         <Prerequisite Id="Microsoft.VisualStudio.Component.GraphDocument" Version="[17.0,)" DisplayName="DGML editor" />
-        <Prerequisite Id="Microsoft.VisualStudio.Component.SQL.DataSources" Version="[17.0,)" DisplayName="Data sources for SQL Server support" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.VisualStudioData" Version="[17.0,)" DisplayName="Data sources and service references" />
     </Prerequisites>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />

@@ -42,6 +42,25 @@
                         "examples": [
                             "*"
                         ]
+                    },
+                    "excludedColumns": {
+                        "type": "array",
+                        "default": [],
+                        "title": "Columns to Exclude from code generation",
+                        "items": {
+                            "type": "string",
+                            "title": "Column",
+                            "examples": [
+                                "Name",
+                                "Email"
+                            ]
+                        },
+                        "examples": [
+                            [
+                                "Name",
+                                "Email"
+                            ]
+                        ]
                     }
                 },
                 "examples": [{
@@ -91,6 +110,25 @@
                         "title": "Exclusion pattern with * symbol, use '*' to exclude all by default",
                         "examples": [
                             "*"
+                        ]
+                    },
+                    "excludedColumns": {
+                        "type": "array",
+                        "default": [],
+                        "title": "Columns to Exclude from code generation",
+                        "items": {
+                            "type": "string",
+                            "title": "Column",
+                            "examples": [
+                                "Name",
+                                "Email"
+                            ]
+                        },
+                        "examples": [
+                            [
+                                "Name",
+                                "Email"
+                            ]
                         ]
                     }
                 },
@@ -372,6 +410,30 @@
                     "examples": [
                         false
                     ]
+                },
+                "generate-mermaid-diagram": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "Create a markdown file with a Mermaid ER diagram during scaffolding",
+                    "examples": [
+                        false
+                    ]
+                },
+                "refresh-object-lists": {
+                    "type": "boolean",
+                    "default": true,
+                    "title": "Refresh the lists of objects (tables, views, stored procedures, functions) from the database in the config file during scaffolding",
+                    "examples": [
+                        false
+                    ]
+                },
+                "use-prefix-navigation-naming": {
+                    "type": "boolean",
+                    "default": true,
+                    "title": "Use prefix based naming of navigations with EF Core 8 or later",
+                    "examples": [
+                        false
+                    ]
                 }
             },
             "examples": [{
@@ -389,7 +451,8 @@
                 "discover-multiple-stored-procedure-resultsets-preview": false,
                 "use-alternate-stored-procedure-resultset-discovery": false,
                 "use-no-navigations-preview": false,
-                "merge-dacpacs": false
+                "merge-dacpacs": false,
+                "refresh-object-lists": true
             }]
         },
         "names": {
@@ -586,7 +649,8 @@
             "name": "[dbo].[Categories]"
         },
         {
-            "name": "[dbo].[CustomerCustomerDemo]"
+            "name": "[dbo].[CustomerCustomerDemo]",
+            "excludedColumns": ["Name", "Email"]
         },
         {
             "name": "[dbo].[Oldtable]",
@@ -596,7 +660,8 @@
             "name": "[dbo].[Categories]"
         },
         {
-            "name": "[dbo].[CustomerCustomerDemo]"
+            "name": "[dbo].[CustomerCustomerDemo]",
+            "excludedColumns": ["Name", "Email"]
         }],
         "stored-procedures": [{
             "name": "[dbo].[Alphabetical list of products]"
@@ -625,7 +690,8 @@
             "remove-defaultsql-from-bool-properties": false,
             "soft-delete-obsolete-files": false,
             "discover-multiple-stored-procedure-resultsets-preview": false,
-            "use-alternate-stored-procedure-resultset-discovery": false
+            "use-alternate-stored-procedure-resultset-discovery": false,
+            "refresh-object-lists": true
         },
         "names": {
             "root-namespace": "MyProject",

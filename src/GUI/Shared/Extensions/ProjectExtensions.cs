@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Community.VisualStudio.Toolkit;
 using EFCorePowerTools.Handlers.ReverseEngineer;
@@ -89,7 +90,7 @@ namespace EFCorePowerTools.Extensions
 
             var files = Directory.GetFiles(projectPath, "efpt.*config.json", SearchOption.AllDirectories);
             result.AddRange(files
-                .Where(f => !f.Contains("\\bin\\") && !f.Contains("\\obj\\")));
+                .Where(f => (f.IndexOf("\\bin\\", StringComparison.OrdinalIgnoreCase) < 0) && (f.IndexOf("\\obj\\", StringComparison.OrdinalIgnoreCase) < 0)));
 
 #pragma warning disable S2583 // Conditionally executed code should be reachable
             if (result.Count == 0)
@@ -172,6 +173,11 @@ namespace EFCorePowerTools.Extensions
                 version = new Version(8, 0);
             }
 
+            if (await project.IsNet90Async())
+            {
+                version = new Version(9, 0);
+            }
+
             return version;
         }
 
@@ -231,11 +237,23 @@ namespace EFCorePowerTools.Extensions
             return IsNet80(targetFrameworkMonikers);
         }
 
+        public static async Task<bool> IsNet90Async(this Project project)
+        {
+            var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
+
+            return IsNet90(targetFrameworkMonikers);
+        }
+
         public static async Task<bool> IsNetStandardAsync(this Project project)
         {
             var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
 
-            return targetFrameworkMonikers?.Contains(".NETStandard,Version=v2.") ?? false;
+            if (targetFrameworkMonikers == null)
+            {
+                return false;
+            }
+
+            return targetFrameworkMonikers.IndexOf(".NETStandard,Version=v2.", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         public static async Task<bool> IsInstalledAsync(this Project project, NuGetPackage package)
@@ -261,7 +279,7 @@ namespace EFCorePowerTools.Extensions
             return false;
         }
 
-        public static List<string> GenerateFiles(this Project project, List<Tuple<string, string>> result, string extension)
+        public static List<string> GenerateFiles(this Project project, List<Tuple<string, string>> result, string extension, bool addToProject = false)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
@@ -276,19 +294,28 @@ namespace EFCorePowerTools.Extensions
                     return list;
                 }
 
-                var filePath = Path.Combine(
-                    Path.GetTempPath(),
-                    item.Item1 + extension);
-
-                if (File.Exists(filePath))
+                if (addToProject)
                 {
-                    File.SetAttributes(filePath, FileAttributes.Normal);
+                    var itemPath = Path.Combine(Path.GetDirectoryName(project.FullPath), item.Item1 + extension);
+                    File.WriteAllText(itemPath, item.Item2, Encoding.UTF8);
+                    list.Add(itemPath);
                 }
+                else
+                {
+                    var filePath = Path.Combine(
+                        Path.GetTempPath(),
+                        item.Item1 + extension);
 
-                File.WriteAllText(filePath, item.Item2);
-                File.SetAttributes(filePath, FileAttributes.ReadOnly);
+                    if (File.Exists(filePath))
+                    {
+                        File.SetAttributes(filePath, FileAttributes.Normal);
+                    }
 
-                list.Add(filePath);
+                    File.WriteAllText(filePath, item.Item2, Encoding.UTF8);
+                    File.SetAttributes(filePath, FileAttributes.ReadOnly);
+
+                    list.Add(filePath);
+                }
             }
 
             return list;
@@ -409,9 +436,19 @@ namespace EFCorePowerTools.Extensions
             return FrameworkCheck(targetFrameworkMonikers, "8");
         }
 
+        private static bool IsNet90(string targetFrameworkMonikers)
+        {
+            return FrameworkCheck(targetFrameworkMonikers, "9");
+        }
+
         private static bool FrameworkCheck(string targetFrameworkMonikers, string version)
         {
-            return targetFrameworkMonikers?.Contains($".NETCoreApp,Version=v{version}.0") ?? false;
+            if (string.IsNullOrEmpty(targetFrameworkMonikers))
+            {
+                return false;
+            }
+
+            return targetFrameworkMonikers.IndexOf($".NETCoreApp,Version=v{version}.0", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static async Task<string> GetOutputPathAsync(Project project)

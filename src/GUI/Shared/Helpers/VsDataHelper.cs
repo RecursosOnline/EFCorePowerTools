@@ -16,9 +16,22 @@ namespace EFCorePowerTools.Helpers
 {
     internal class VsDataHelper
     {
+        public static readonly HashSet<Guid> SupportedProviders = new HashSet<Guid>()
+        {
+            new Guid(Resources.SqlServerDotNetProvider),
+            new Guid(Resources.MicrosoftSqlServerDotNetProvider),
+            new Guid(Resources.SQLiteProvider),
+            new Guid(Resources.SQLitePrivateProvider),
+            new Guid(Resources.MicrosoftSQLiteProvider),
+            new Guid(Resources.NpgsqlProvider),
+            new Guid(Resources.MysqlVSProvider),
+            new Guid(Resources.OracleProvider),
+            new Guid(Resources.FirebirdProvider),
+        };
+
         public static string GetSavedConnectionName(string connectionString, DatabaseType dbType)
         {
-            if (dbType == DatabaseType.SQLServer && !connectionString.Contains(";Authentication="))
+            if (dbType == DatabaseType.SQLServer && (connectionString.IndexOf(";Authentication=", StringComparison.OrdinalIgnoreCase) < 0))
             {
                 return PathFromConnectionString(connectionString);
             }
@@ -147,12 +160,16 @@ namespace EFCorePowerTools.Helpers
             // http://www.mztools.com/articles/2007/MZ2007018.aspx
             Dictionary<string, DatabaseConnectionModel> databaseList = new Dictionary<string, DatabaseConnectionModel>();
             var dataExplorerConnectionManager = await VS.GetServiceAsync<IVsDataExplorerConnectionManager, IVsDataExplorerConnectionManager>();
+
             Guid providerSQLite = new Guid(Resources.SQLiteProvider);
             Guid providerMicrosoftSQLite = new Guid(Resources.MicrosoftSQLiteProvider);
             Guid providerSQLitePrivate = new Guid(Resources.SQLitePrivateProvider);
             Guid providerNpgsql = new Guid(Resources.NpgsqlProvider);
             Guid providerMysql = new Guid(Resources.MysqlVSProvider);
             Guid providerOracle = new Guid(Resources.OracleProvider);
+            Guid providerFirebird = new Guid(Resources.FirebirdProvider);
+            Guid providerSqlServerDotNet = new Guid(Resources.SqlServerDotNetProvider);
+            Guid providerMicrosoftSqlServerDotNet = new Guid(Resources.MicrosoftSqlServerDotNetProvider);
 
             try
             {
@@ -180,8 +197,8 @@ namespace EFCorePowerTools.Helpers
                                 info.DatabaseType = DatabaseType.SQLite;
                             }
 
-                            if (objProviderGuid == new Guid(Resources.SqlServerDotNetProvider)
-                                || objProviderGuid == new Guid(Resources.MicrosoftSqlServerDotNetProvider))
+                            if (objProviderGuid == providerSqlServerDotNet
+                                || objProviderGuid == providerMicrosoftSqlServerDotNet)
                             {
                                 info.DatabaseType = DatabaseType.SQLServer;
                             }
@@ -200,6 +217,11 @@ namespace EFCorePowerTools.Helpers
                             if (objProviderGuid == providerOracle)
                             {
                                 info.DatabaseType = DatabaseType.Oracle;
+                            }
+
+                            if (objProviderGuid == providerFirebird)
+                            {
+                                info.DatabaseType = DatabaseType.Firebird;
                             }
 
                             if (info.DatabaseType != DatabaseType.Undefined
@@ -296,6 +318,12 @@ namespace EFCorePowerTools.Helpers
                 {
                     dbType = DatabaseType.Mysql;
                     providerGuid = Resources.MysqlVSProvider;
+                }
+
+                if (providerInvariant == "FirebirdSql.Data.FirebirdClient")
+                {
+                    dbType = DatabaseType.Firebird;
+                    providerGuid = Resources.FirebirdProvider;
                 }
             }
 

@@ -1,0 +1,100 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <GenerateErrorForMissingTargetingPacks>false</GenerateErrorForMissingTargetingPacks>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="AdventureWorks2014.dacpac" />
+    <None Remove="Aw2014Person.txt" />
+    <None Remove="Chinook.dacpac" />
+    <None Remove="ChinookContext.txt" />
+    <None Remove="Dacpac\Issue1262.dacpac" />
+    <None Remove="Dacpac\Temporal.dacpac" />
+    <None Remove="Identity.txt" />
+    <None Remove="Issue208.dacpac" />
+    <None Remove="Issue210.dacpac" />
+    <None Remove="Issue604.txt" />
+    <None Remove="Issue687.txt" />
+    <None Remove="longview50.txt" />
+    <None Remove="NoFk.txt" />
+    <None Remove="Northwind.txt" />
+    <None Remove="Pfizer.txt" />
+    <None Remove="Samurai.txt" />
+    <None Remove="SingleNav.txt" />
+    <None Remove="TestDb.dacpac" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Dacpac\AdventureWorks2014.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\Issue1262.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\Temporal.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Aw2014Person.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\Chinook.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\ChinookContext.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Issue687.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Identity.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\Issue208.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\Issue210.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Issue604.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\longview50.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\NoFk.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Northwind.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Pfizer.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\Samurai.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dgml\SingleNav.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dacpac\TestDb.dacpac">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\Nupkg\ErikEJ.EntityFrameworkCore.DgmlBuilder\template.dgml" Link="template.dgml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="4.1.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Nupkg\ErikEJ.EntityFrameworkCore.DgmlBuilder\ErikEJ.EntityFrameworkCore.DgmlBuilder.csproj" />
+    <ProjectReference Include="..\..\Nupkg\ErikEJ.EntityFrameworkCore.SqlServer.Dacpac\ErikEJ.EntityFrameworkCore.6.SqlServer.Dacpac.csproj" />
+    <ProjectReference Include="..\RevEng.Core.60\RevEng.Core.60.csproj" />
+  </ItemGroup>
+
+</Project>

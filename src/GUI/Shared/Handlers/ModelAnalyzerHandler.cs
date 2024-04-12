@@ -78,7 +78,7 @@ namespace EFCorePowerTools.Handlers
                     throw new InvalidOperationException(ModelAnalyzerLocale.UnableToCollectModelInformation);
                 }
 
-                if (processResult.Contains("Error:"))
+                if (processResult.IndexOf("Error:", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     throw new InvalidOperationException(processResult);
                 }
@@ -92,7 +92,7 @@ namespace EFCorePowerTools.Handlers
                         Telemetry.TrackEvent("PowerTools.GenerateModelDgml");
                         break;
                     case GenerationType.Ddl:
-                        var files = project.GenerateFiles(modelResult, ".sql");
+                        var files = project.GenerateFiles(modelResult, ".sql", addToProject: true);
                         foreach (var file in files)
                         {
                             await VS.Documents.OpenAsync(file);

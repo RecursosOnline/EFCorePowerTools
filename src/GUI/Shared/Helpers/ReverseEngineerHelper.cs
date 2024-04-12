@@ -33,7 +33,7 @@ namespace EFCorePowerTools.Helpers
 
         public void DropT4Templates(string projectPath)
         {
-            DropTemplates(projectPath, projectPath, CodeGenerationMode.EFCore7, false);
+            DropTemplates(projectPath, projectPath, CodeGenerationMode.EFCore8, false);
         }
 
         public string DropTemplates(string optionsPath, string projectPath, CodeGenerationMode codeGenerationMode, bool useHandlebars, int selectedOption = 0)
@@ -100,7 +100,7 @@ namespace EFCorePowerTools.Helpers
                 }
             }
 
-            if (!useHandlebars && Directory.Exists(toDir))
+            if (!useHandlebars && Directory.Exists(toDir) && selectedOption != 3)
             {
                 var error = $"The latest T4 template version could not be found, looking for 'Template version: {t4Version}' in the T4 file - please update your T4 templates, for example by renaming the CodeTemplates folder.";
                 var check = $"Template version: {t4Version}";
@@ -139,9 +139,10 @@ namespace EFCorePowerTools.Helpers
                 list.Add(new CodeGenerationItem { Key = (int)CodeGenerationMode.EFCore6, Value = "EF Core 6" });
             }
 
-            if (minimumVersion.Major == 8)
+            if (minimumVersion.Major >= 8)
             {
                 list.Add(new CodeGenerationItem { Key = (int)CodeGenerationMode.EFCore8, Value = "EF Core 8" });
+                list.Add(new CodeGenerationItem { Key = (int)CodeGenerationMode.EFCore7, Value = "EF Core 7" });
             }
 
             if (!list.Any())
@@ -194,6 +195,11 @@ namespace EFCorePowerTools.Helpers
 
             if (revEngResult.EntityWarnings.Count > 0)
             {
+                if (revEngResult.EntityWarnings.Exists(w => w.IndexOf("Could not find type mapping", StringComparison.OrdinalIgnoreCase) >= 0))
+                {
+                    revEngResult.EntityWarnings.Add("Consider enabling more type mappings via 'Advanced' options.");
+                }
+
                 errors.Append(ReverseEngineerLocale.CheckOutputWindowForWarnings + Environment.NewLine);
             }
 

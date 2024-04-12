@@ -1,0 +1,33 @@
+name: CLI Tool Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Build version (xxx)'     
+        required: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-dotnet@v4
+      with:
+        global-json-file: global.json
+
+    - name: Package CLI 6
+      run: dotnet pack src\Core\efcpt.6\efcpt.6.csproj -p:PackageVersion=6.1.${{ github.event.inputs.version }} -p:InformationalVersion=6.1.${{ github.event.inputs.version }}
+
+    - name: Package CLI 7
+      run: dotnet pack src\Core\efcpt.7\efcpt.7.csproj -p:PackageVersion=7.1.${{ github.event.inputs.version }} -p:InformationalVersion=7.1.${{ github.event.inputs.version }}
+  
+    - name: Package CLI 8
+      run: dotnet pack src\Core\efcpt.8\efcpt.8.csproj -p:PackageVersion=8.1.${{ github.event.inputs.version }} -p:InformationalVersion=8.1.${{ github.event.inputs.version }}
+
+    - name: Publish NuGet
+      if: startsWith(github.ref, 'refs/heads/master')
+      run: dotnet nuget push **\*.nupkg --source 'https://api.nuget.org/v3/index.json' --api-key ${{ secrets.NUGET }} --skip-duplicate
+      

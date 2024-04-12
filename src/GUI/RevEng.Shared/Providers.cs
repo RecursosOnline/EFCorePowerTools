@@ -83,19 +83,19 @@ namespace RevEng.Common
 
         public static List<NuGetPackage> GetNeededPackages(DatabaseType databaseType, bool useSpatial, bool useNodaTime, bool useDateOnlyTimeOnly, bool useHierarchyId, bool discoverMultipleResultSets, bool hasProcedures, CodeGenerationMode codeGenerationMode)
         {
-            // TODO Update versions here when adding provider updates
+            // Update versions here when adding provider and other updates
             var packages = new List<NuGetPackage>();
 
             if (databaseType == DatabaseType.SQLServer || databaseType == DatabaseType.SQLServerDacpac)
             {
-                var pkgVersion = "7.0.14";
+                var pkgVersion = "7.0.17";
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.25";
+                        pkgVersion = "6.0.28";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.0";
+                        pkgVersion = "8.0.3";
                         break;
                 }
 
@@ -181,13 +181,13 @@ namespace RevEng.Common
                     }
                 }
 
-                if (useDateOnlyTimeOnly && codeGenerationMode != CodeGenerationMode.EFCore8)
+                if (useDateOnlyTimeOnly)
                 {
-                    pkgVersion = "7.0.5";
+                    pkgVersion = "7.0.8";
                     switch (codeGenerationMode)
                     {
                         case CodeGenerationMode.EFCore6:
-                            pkgVersion = "6.0.5";
+                            pkgVersion = "6.0.8";
                             break;
                     }
 
@@ -210,7 +210,7 @@ namespace RevEng.Common
                     packages.Add(new NuGetPackage
                     {
                         PackageId = "Dapper",
-                        Version = "2.0.143",
+                        Version = "2.1.28",
                         DatabaseTypes = new List<DatabaseType> { DatabaseType.SQLServer, DatabaseType.SQLServerDacpac },
                         IsMainProviderPackage = false,
                         UseMethodName = null,
@@ -220,14 +220,14 @@ namespace RevEng.Common
 
             if (databaseType == DatabaseType.SQLite)
             {
-                var pkgVersion = "7.0.14";
+                var pkgVersion = "7.0.17";
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.25";
+                        pkgVersion = "6.0.28";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.0";
+                        pkgVersion = "8.0.3";
                         break;
                 }
 
@@ -322,7 +322,7 @@ namespace RevEng.Common
                         break;
 
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.0-beta.2";
+                        pkgVersion = "8.0.1";
                         break;
                 }
 

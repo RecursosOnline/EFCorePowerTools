@@ -81,6 +81,7 @@ namespace RevEng.Common.Cli
                 ProjectRootNamespace = names.RootNamespace,
                 MergeDacpacs = config.CodeGeneration.MergeDacpacs,
                 UseDecimalDataAnnotation = config.CodeGeneration.UseDecimalDataAnnotation,
+                UsePrefixNavigationNaming = config.CodeGeneration.UsePrefixNavigationNaming,
 
                 // Not supported:
                 UseHandleBars = false,
@@ -91,7 +92,7 @@ namespace RevEng.Common.Cli
                 UseNoDefaultConstructor = false, // not implemented, will consider if asked for
                 DefaultDacpacSchema = null, // not implemented, will consider if asked for
                 UseNoObjectFilter = false, // will always add all objects and use exclusions to filter list (for now)
-                UseAsyncCalls = true, // not implemented, will consider if asked for
+                UseAsyncCalls = true, // not implemented
                 FilterSchemas = false, // not implemented
                 Schemas = null, // not implemented
             };
@@ -110,9 +111,10 @@ namespace RevEng.Common.Cli
             return options;
         }
 
-        public static bool TryGetCliConfig(string fullPath, string connectionString, DatabaseType databaseType, List<TableModel> objects, CodeGenerationMode codeGenerationMode, out CliConfig config)
+        public static bool TryGetCliConfig(string fullPath, string connectionString, DatabaseType databaseType, List<TableModel> objects, CodeGenerationMode codeGenerationMode, out CliConfig config, out List<string> warnings)
         {
-            if (File.Exists(fullPath))
+            var cliConfigExists = File.Exists(fullPath);
+            if (cliConfigExists)
             {
                 config = JsonSerializer.Deserialize<CliConfig>(File.ReadAllText(fullPath, Encoding.UTF8));
             }
@@ -136,15 +138,23 @@ namespace RevEng.Common.Cli
                 }
             }
 
-            config.Tables = Add(objects, config.Tables);
-            config.Views = Add(objects, config.Views);
-            config.StoredProcedures = Add(objects, config.StoredProcedures);
-            config.Functions = Add(objects, config.Functions);
+            if (config.CodeGeneration.RefreshObjectLists)
+            {
+                config.Tables = Add(objects, config.Tables);
+                config.Views = Add(objects, config.Views);
+                config.StoredProcedures = Add(objects, config.StoredProcedures);
+                config.Functions = Add(objects, config.Functions);
+            }
 
+            warnings = ValidateExcludedColumns(config, objects);
+
+            if (!cliConfigExists || config.CodeGeneration.RefreshObjectLists)
+            {
 #pragma warning disable CA1869 // Cache and reuse 'JsonSerializerOptions' instances
-            var options = new JsonSerializerOptions { WriteIndented = true };
+                var options = new JsonSerializerOptions { WriteIndented = true };
 #pragma warning restore CA1869 // Cache and reuse 'JsonSerializerOptions' instances
-            File.WriteAllText(fullPath, JsonSerializer.Serialize(config, options), Encoding.UTF8);
+                File.WriteAllText(fullPath, JsonSerializer.Serialize(config, options), Encoding.UTF8);
+            }
 
             return true;
         }
@@ -166,6 +176,40 @@ namespace RevEng.Common.Cli
             return objects;
         }
 
+        /// <summary>
+        /// Ensures that any excluded columns for tables are not required. Removes the invalid columns from the list.
+        /// </summary>
+        /// <param name="config">Configuration to Validate.</param>
+        /// <param name="objects">Table Models to check against.</param>
+        private static List<string> ValidateExcludedColumns(CliConfig config, List<TableModel> objects)
+        {
+            List<string> warnings = new();
+
+            var tables = config.Tables ?? new List<Table>();
+            var views = config.Views ?? new List<View>();
+
+            var objectsToCheck = tables.Where(x => x.ExcludedColumns?.Count > 0)
+                .Select(table => table as IEntity)
+                .Union(views.Where(x => x.ExcludedColumns?.Count > 0));
+
+            foreach (var table in objectsToCheck)
+            {
+                var dbTable = objects.Single(x => x.DisplayName == table.Name);
+                var columnsThatCannotBeExcluded = dbTable.Columns.Where(x => x.IsForeignKey || x.IsPrimaryKey).Select(x => x.Name);
+
+                var badExclusions = columnsThatCannotBeExcluded.Intersect(table.ExcludedColumns);
+
+                foreach (var column in badExclusions)
+                {
+                    var originalColumnString = table.ExcludedColumns.Single(x => string.Equals(x, column, StringComparison.Ordinal));
+                    warnings.Add($"{table.Name}.{originalColumnString} cannot be excluded because it is either a Primary Key or Foreign Key of another Mapped Column.  This entry has been removed from the config file.");
+                    table.ExcludedColumns.Remove(originalColumnString);
+                }
+            }
+
+            return warnings;
+        }
+
         private static void ToSerializationModel<T>(IEnumerable<T> entities, Action<IEnumerable<SerializationTableModel>> addRange)
             where T : IEntity, new()
         {
@@ -182,7 +226,7 @@ namespace RevEng.Common.Cli
 
             var serializationTableModels = entities.Where<T>(entity => ExclusionFilter(entity, excludeAll, filters)
                 && !string.IsNullOrEmpty(entity.Name))
-                .Select(entity => new SerializationTableModel(entity.Name, objectType, null));
+                .Select(entity => new SerializationTableModel(entity.Name, objectType, entity.ExcludedColumns));
             addRange(serializationTableModels);
         }
 
@@ -283,7 +327,9 @@ namespace RevEng.Common.Cli
             var newItems = models.Where(o => o.ObjectType == objectType).ToList();
             if (newItems.Count == 0)
             {
-                return new List<T>();
+#pragma warning disable S1168
+                return null;
+#pragma warning restore S1168
             }
 
             var result = entities ?? new List<T>();
@@ -292,13 +338,13 @@ namespace RevEng.Common.Cli
             foreach (var displayName in newItems.Select(t => t.DisplayName))
             {
                 T existing = result.SingleOrDefault(t => t.Name == displayName);
-                if (existing == null)
+                if (Equals(existing, default(T)))
                 {
                     result.Add(new T { Name = displayName });
                 }
             }
 
-            return result;
+            return result.Count > 0 ? result : null;
         }
 
         private static ObjectType DefineObjectType<T>()

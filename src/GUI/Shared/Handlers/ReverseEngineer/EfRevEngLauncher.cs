@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Community.VisualStudio.Toolkit;
 using EFCorePowerTools.Extensions;
 using RevEng.Common;
 
@@ -59,7 +58,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             resultDeserializer = new ResultDeserializer();
         }
 
-        public static async Task<ReverseEngineerResult> LaunchExternalRunnerAsync(ReverseEngineerOptions options, CodeGenerationMode codeGenerationMode, Project project)
+        public static async Task<ReverseEngineerResult> LaunchExternalRunnerAsync(ReverseEngineerOptions options, CodeGenerationMode codeGenerationMode)
         {
             var databaseObjects = options.Tables;
             if (!databaseObjects.Exists(t => t.ObjectType == ObjectType.Table))
@@ -115,6 +114,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                 UseDateOnlyTimeOnly = options.UseDateOnlyTimeOnly,
                 UseSchemaNamespaces = options.UseSchemaNamespaces,
                 UseDecimalDataAnnotation = options.UseDecimalDataAnnotationForSprocResult,
+                UsePrefixNavigationNaming = options.UsePrefixNavigationNaming,
             };
 
             var launcher = new EfRevEngLauncher(commandOptions, codeGenerationMode);
@@ -149,40 +149,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
 
         private static async Task<string> RunProcessAsync(ProcessStartInfo startInfo)
         {
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
-            startInfo.RedirectStandardError = true;
-            startInfo.CreateNoWindow = true;
-            startInfo.StandardOutputEncoding = Encoding.UTF8;
-            var standardOutput = new StringBuilder();
-            var error = string.Empty;
-
-            using (var process = Process.Start(startInfo))
-            {
-                while (process != null && !process.HasExited)
-                {
-                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
-                }
-
-                if (process != null)
-                {
-                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
-                }
-
-                if (process != null)
-                {
-                    error = await process.StandardError.ReadToEndAsync();
-                }
-            }
-
-            var result = standardOutput.ToString();
-
-            if (string.IsNullOrEmpty(result) && !string.IsNullOrEmpty(error))
-            {
-                result = "Error:" + Environment.NewLine + error;
-            }
-
-            return result;
+            return await ProcessLauncher.RunProcessAsync(startInfo);
         }
 
         private async Task<string> GetDgmlInternalAsync(string arguments)
@@ -230,7 +197,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
         private async Task<ReverseEngineerResult> GetOutputAsync()
         {
             var path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()) + ".json";
-            File.WriteAllText(path, options.Write());
+            File.WriteAllText(path, options.Write(), Encoding.UTF8);
 
             var launchPath = DropNetCoreFiles();
 

@@ -25,6 +25,44 @@ namespace EFCorePowerTools.Handlers
             this.project = project;
         }
 
+        public static async Task<string> RunProcessAsync(ProcessStartInfo startInfo)
+        {
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardOutput = true;
+            startInfo.RedirectStandardError = true;
+            startInfo.CreateNoWindow = true;
+            startInfo.StandardOutputEncoding = Encoding.UTF8;
+            startInfo.StandardErrorEncoding = Encoding.UTF8;
+
+            var standardOutput = new StringBuilder();
+            var error = string.Empty;
+            using (var process = Process.Start(startInfo))
+            {
+                while (process != null && !process.HasExited)
+                {
+                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
+                }
+
+                if (process != null)
+                {
+                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
+                }
+
+                if (process != null)
+                {
+                    error = await process.StandardError.ReadToEndAsync();
+                }
+            }
+
+            var result = standardOutput.ToString();
+            if (string.IsNullOrEmpty(result) && !string.IsNullOrEmpty(error))
+            {
+                result = "Error:" + Environment.NewLine + error;
+            }
+
+            return result;
+        }
+
         public Task<string> GetOutputAsync(string outputPath, string projectPath, GenerationType generationType, string contextName, string migrationIdentifier, string nameSpace)
         {
             return GetOutputInternalAsync(outputPath, projectPath, generationType, contextName, migrationIdentifier, nameSpace);
@@ -63,7 +101,7 @@ namespace EFCorePowerTools.Handlers
                     continue;
                 }
 
-                if (!context.Contains("DebugView:"))
+                if (context.IndexOf("DebugView:", StringComparison.OrdinalIgnoreCase) < 0)
                 {
                     continue;
                 }
@@ -108,11 +146,6 @@ namespace EFCorePowerTools.Handlers
             {
                 FileName = Path.Combine(Path.GetDirectoryName(launchPath) ?? throw new InvalidOperationException(), "efpt.exe"),
                 Arguments = "\"" + outputPath + "\"",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                CreateNoWindow = true,
-                StandardOutputEncoding = Encoding.UTF8,
             };
 
             var outputs = " \"" + outputPath + "\" \"" + startupOutputPath + "\" ";
@@ -194,40 +227,14 @@ namespace EFCorePowerTools.Handlers
 
             try
             {
-                File.WriteAllText(Path.Combine(Path.GetTempPath(), "efptparams.txt"), startInfo.Arguments);
+                File.WriteAllText(Path.Combine(Path.GetTempPath(), "efptparams.txt"), startInfo.Arguments, Encoding.UTF8);
             }
             catch
             {
                 // Ignore
             }
 
-            var standardOutput = new StringBuilder();
-            var error = string.Empty;
-            using (var process = Process.Start(startInfo))
-            {
-                while (process != null && !process.HasExited)
-                {
-                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
-                }
-
-                if (process != null)
-                {
-                    standardOutput.Append(await process.StandardOutput.ReadToEndAsync());
-                }
-
-                if (process != null)
-                {
-                    error = await process.StandardError.ReadToEndAsync();
-                }
-            }
-
-            var result = standardOutput.ToString();
-            if (string.IsNullOrEmpty(result) && !string.IsNullOrEmpty(error))
-            {
-                result = "Error:" + Environment.NewLine + error;
-            }
-
-            return result;
+            return await RunProcessAsync(startInfo);
         }
 
         private async Task<string> DropNetCoreFilesAsync()
