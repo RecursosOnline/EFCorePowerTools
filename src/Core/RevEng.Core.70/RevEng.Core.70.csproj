@@ -13,11 +13,11 @@
 
   <ItemGroup>
     <Compile Include="..\RevEng.Core.60\*.cs" Link="%(Filename)%(Extension)" />
-    <Compile Include="..\RevEng.Core.60\Functions\*.cs" Link="Functions\%(Filename)%(Extension)" />
     <Compile Include="..\RevEng.Core.60\Routines\*.cs" Link="Routines\%(Filename)%(Extension)" />
-    <Compile Include="..\RevEng.Core.60\Procedures\*.cs" Link="Procedures\%(Filename)%(Extension)" />
-    <Compile Include="..\RevEng.Core.60\Dgml\*.cs" Link="Dgml\%(Filename)%(Extension)" />
-    <Compile Include="..\RevEng.Core.60\Mermaid\*.cs" Link="Mermaid\%(Filename)%(Extension)" />
+    <Compile Include="..\RevEng.Core.60\Routines\Extensions\*.cs" Link="Routines\Extensions\%(Filename)%(Extension)" />
+    <Compile Include="..\RevEng.Core.60\Routines\Functions\*.cs" Link="Routines\Functions\%(Filename)%(Extension)" />
+    <Compile Include="..\RevEng.Core.60\Routines\Procedures\*.cs" Link="Routines\Procedures\%(Filename)%(Extension)" />
+    <Compile Include="..\RevEng.Core.60\Diagram\*.cs" Link="Diagram\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,14 +35,14 @@
     <PackageReference Include="EntityFrameworkCore.Scaffolding.Handlebars" Version="7.0.0" />
     <PackageReference Include="EntityFrameworkCore.Sqlite.NodaTime" Version="7.0.0" />
     <PackageReference Include="EntityFrameworkCore.SqlServer.HierarchyId" Version="4.0.0" />
-    <PackageReference Include="ErikEJ.EntityFrameworkCore.SqlServer.DateOnlyTimeOnly" Version="7.0.8" />
+    <PackageReference Include="ErikEJ.EntityFrameworkCore.SqlServer.DateOnlyTimeOnly" Version="7.0.10" />
     <PackageReference Include="FirebirdSql.EntityFrameworkCore.Firebird" Version="10.0.0" />    
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.17" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="7.0.17" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="7.0.11" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="7.0.11" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.20" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer.NetTopologySuite" Version="7.0.20" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" Version="7.0.18" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NetTopologySuite" Version="7.0.18" />
     <PackageReference Include="Oracle.EntityFrameworkCore" Version="7.21.13" />
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql.NetTopologySuite" Version="7.0.0" />
     <PackageReference Include="SimplerSoftware.EntityFrameworkCore.SqlServer.NodaTime" Version="7.1.0" />
@@ -50,7 +50,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Nupkg\ErikEJ.EntityFrameworkCore.7.SqlServer.Dacpac\ErikEJ.EntityFrameworkCore.7.SqlServer.Dacpac.csproj" />
     <ProjectReference Include="..\RevEng.Core.Abstractions\RevEng.Core.Abstractions.csproj" />
     <ProjectReference Include="..\..\GUI\RevEng.Shared\RevEng.Common.csproj" />
   </ItemGroup>

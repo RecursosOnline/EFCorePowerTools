@@ -15,10 +15,7 @@ namespace RevEng.Core
         public static ReverseEngineerResult GenerateFiles(ReverseEngineerCommandOptions options)
         {
             ArgumentNullException.ThrowIfNull(options);
-#if CORE80
-            // Remove this when 8.0.4 is released
-            AppContext.SetSwitch("Microsoft.EntityFrameworkCore.Issue32422", true);
-#endif
+
             var errors = new List<string>();
             var warnings = new List<string>();
             var info = new List<string>();
@@ -99,10 +96,13 @@ namespace RevEng.Core
 #endif
                 if (options.SelectedToBeGenerated != 2)
                 {
-                    bool supportsRoutines = options.DatabaseType == DatabaseType.SQLServerDacpac || options.DatabaseType == DatabaseType.SQLServer;
-                    procedurePaths = scaffolder.GenerateStoredProcedures(options, schemas, ref warnings, outputContextDir, modelNamespace, contextNamespace, supportsRoutines);
+                    bool supportsProcedures = options.DatabaseType == DatabaseType.SQLServerDacpac
+                        || options.DatabaseType == DatabaseType.SQLServer
+                        || options.DatabaseType == DatabaseType.Npgsql;
+                    procedurePaths = scaffolder.GenerateStoredProcedures(options, schemas, ref warnings, outputContextDir, modelNamespace, contextNamespace, supportsProcedures);
 
-                    bool supportsFunctions = options.DatabaseType == DatabaseType.SQLServer;
+                    bool supportsFunctions = options.DatabaseType == DatabaseType.SQLServer
+                        || options.DatabaseType == DatabaseType.SQLServerDacpac;
                     functionPaths = scaffolder.GenerateFunctions(options, schemas, ref warnings, outputContextDir, modelNamespace, contextNamespace, supportsFunctions);
 
                     if (functionPaths != null || procedurePaths != null)

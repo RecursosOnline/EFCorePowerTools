@@ -13,8 +13,8 @@ using RevEng.Common;
 using RevEng.Core.Abstractions;
 using RevEng.Core.Abstractions.Metadata;
 using RevEng.Core.Abstractions.Model;
-using RevEng.Core.Functions;
-using RevEng.Core.Procedures;
+using RevEng.Core.Routines.Functions;
+using RevEng.Core.Routines.Procedures;
 
 namespace RevEng.Core
 {
@@ -463,13 +463,15 @@ namespace RevEng.Core
             {
                 foreach (var column in databaseModel.Tables
                     .SelectMany(table => table.Columns
-                        .Where(column => ((column.StoreType == "bit" || column.StoreType == "boolean")
+                        .Where(column => (
+                            (column.StoreType == "bit" || column.StoreType == "boolean" || column.StoreType == "bit(1)")
                             && !column.IsNullable
                             && !string.IsNullOrEmpty(column.DefaultValueSql))
                             ||
 
                             // Oracle
-                            (column.StoreType == "NUMBER(1)" && !column.IsNullable
+                            (column.StoreType == "NUMBER(1)"
+                                && !column.IsNullable
                                 && !string.IsNullOrEmpty(column.DefaultValueSql)
                                 && (column.DefaultValueSql?.Trim() == "1" || column.DefaultValueSql?.Trim() == "0")))))
                 {

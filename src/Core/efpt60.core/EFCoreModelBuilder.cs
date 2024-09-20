@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Design.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Modelling
 {
-    public static class EfCoreModelBuilder
+    internal static class EfCoreModelBuilder
     {
 #pragma warning disable CA1002 // Do not expose generic lists
         public static List<Tuple<string, string>> GenerateDebugView(string outputPath, string startupOutputPath)
@@ -52,24 +52,15 @@ namespace Modelling
         private static string GenerateCreateScript(DbContext dbContext)
         {
             var database = dbContext.Database;
-            var model = database.GetService<IModel>();
-            var differ = database.GetService<IMigrationsModelDiffer>();
-            var generator = database.GetService<IMigrationsSqlGenerator>();
-            var sql = database.GetService<ISqlGenerationHelper>();
+            var migrator = database.GetService<IMigrator>();
 
-            var operations = differ.GetDifferences(null, dbContext.GetService<IDesignTimeModel>().Model.GetRelationalModel());
-
-            var commands = generator.Generate(operations, model);
-
-            var builder = new StringBuilder();
-            foreach (var command in commands)
+            if (migrator == null)
             {
-                builder
-                    .Append(command.CommandText)
-                    .AppendLine(sql.BatchTerminator);
+                var databaseProvider = database.GetService<IDatabaseProvider>();
+                throw new OperationException(DesignStrings.NonRelationalProvider(databaseProvider?.Name ?? "Unknown"));
             }
 
-            return builder.ToString();
+            return migrator.GenerateScript(null, null, MigrationsSqlGenerationOptions.Idempotent);
         }
 
         private static List<Type> GetDbContextTypes(DbContextOperations operations)
@@ -101,7 +92,11 @@ namespace Modelling
             var reporter = new OperationReporter(
                 new OperationReportHandler());
 
+#if CORE90
+            return new DbContextOperations(reporter, assembly, startupAssembly ?? assembly, outputPath, null, null, null, false, Array.Empty<string>());
+#else
             return new DbContextOperations(reporter, assembly, startupAssembly ?? assembly, outputPath, null, null, false, Array.Empty<string>());
+#endif
         }
 
         private static Assembly Load(string assemblyPath)

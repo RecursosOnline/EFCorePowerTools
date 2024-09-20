@@ -5,18 +5,23 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Scaffolding;
 using Microsoft.Extensions.DependencyInjection;
 using RevEng.Common;
+using RevEng.Common.Dab;
 using RevEng.Core;
 using RevEng.Core.Abstractions.Model;
-using RevEng.Core.Dgml;
+#if NET8_0 && !CORE90
+using RevEng.Core.DacpacReport;
+#endif
+using RevEng.Core.Diagram;
 
 [assembly: CLSCompliant(true)]
 [assembly: SuppressMessage("Reliability", "CA2007:Consider calling ConfigureAwait on the awaited task", Justification = "Reviewed")]
 namespace EfReveng
 {
-    public static class Program
+    internal static class Program
     {
         public static async System.Threading.Tasks.Task<int> Main(string[] args)
         {
@@ -64,7 +69,8 @@ namespace EfReveng
                     }
 
                     if ((args.Length == 3 || args.Length == 4)
-                        && args[0] == "dgml" && int.TryParse(args[1], out int dbType))
+                        && (args[0] == "dgml" || args[0] == "erdiagram")
+                        && int.TryParse(args[1], out int dbType))
                     {
                         var schemas = Enumerable.Empty<string>().ToList();
                         if (args.Length == 4)
@@ -72,9 +78,18 @@ namespace EfReveng
                             schemas = args[3].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s).ToList();
                         }
 
-                        var builder = new DgmlBuilder(dbType, args[2], schemas);
+                        var builder = new DiagramBuilder(dbType, args[2], schemas);
 
-                        var buildResult = builder.GetDgmlFileName();
+                        var buildResult = string.Empty;
+
+                        if (args[0] == "dgml")
+                        {
+                            buildResult = builder.GetDgmlFileName();
+                        }
+                        else
+                        {
+                            buildResult = builder.GetErDiagramFileName();
+                        }
 
                         await Console.Out.WriteLineAsync("Result:");
                         await Console.Out.WriteLineAsync(buildResult);
@@ -82,6 +97,65 @@ namespace EfReveng
                         return 0;
                     }
 
+#if NET8_0 && !CORE90
+                    if (args.Length == 2
+                        && args[0] == "dacpacreport"
+                        && new FileInfo(args[1]).Exists)
+                    {
+                        var builder = new DacpacReportBuilder(new FileInfo(args[1]));
+
+                        var buildResult = builder.BuildReport();
+
+                        await Console.Out.WriteLineAsync("Result:");
+                        await Console.Out.WriteLineAsync(buildResult);
+
+                        return 0;
+                    }
+
+                    if (args.Length == 2
+                        && args[0] == "dacpacreportextract")
+                    {
+                        var extractor = new DacpacExtractor(new SqlConnectionStringBuilder(args[1]));
+
+                        var dacpacPath = extractor.ExtractDacpac();
+
+                        var builder = new DacpacReportBuilder(dacpacPath);
+
+                        var buildResult = builder.BuildReport();
+
+                        await Console.Out.WriteLineAsync("Result:");
+                        await Console.Out.WriteLineAsync(buildResult);
+
+                        return 0;
+                    }
+#endif
+#if NET8_0
+
+                    if (args.Length == 3
+                        && args[0] == "dabbuilder"
+                        && new FileInfo(args[1]).Exists)
+                    {
+                        var dabOptions = DataApiBuilderOptionsExtensions.TryRead(args[1]);
+
+                        if (dabOptions == null)
+                        {
+                            await Console.Out.WriteLineAsync("Error:");
+                            await Console.Out.WriteLineAsync("Could not read options");
+                            return 1;
+                        }
+
+                        dabOptions.ConnectionString = args[2];
+
+                        var builder = new DabBuilder(dabOptions);
+
+                        var buildResult = builder.GetDabConfigCmdFile();
+
+                        await Console.Out.WriteLineAsync("Result:");
+                        await Console.Out.WriteLineAsync(buildResult);
+
+                        return 0;
+                    }
+#endif
                     if (!File.Exists(args[0]))
                     {
                         await Console.Out.WriteLineAsync("Error:");

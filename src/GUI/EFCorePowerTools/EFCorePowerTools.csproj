@@ -71,9 +71,6 @@
     <Compile Include="Dialogs\CompareResultDialog.xaml.cs">
       <DependentUpon>CompareResultDialog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Dialogs\EfCoreMigrationsDialog.xaml.cs">
-      <DependentUpon>EfCoreMigrationsDialog.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Dialogs\EfCoreModelDialog.xaml.cs">
       <DependentUpon>EfCoreModelDialog.xaml</DependentUpon>
     </Compile>
@@ -102,6 +99,11 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="Locales\ButtonLocale.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ButtonLocale.resx</DependentUpon>
+    </Compile>
     <Compile Include="Locales\ModelAnalyzerLocale.Designer.cs">
       <DependentUpon>ModelAnalyzerLocale.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -109,11 +111,6 @@
     </Compile>
     <Compile Include="Locales\DgmlLocale.Designer.cs">
       <DependentUpon>DgmlLocale.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Locales\MigrationsLocale.Designer.cs">
-      <DependentUpon>MigrationsLocale.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -153,7 +150,6 @@
     <Resource Include="Resources\ScrollbarArrowDownRight.png" />
     <Resource Include="Resources\Add.png" />
     <Resource Include="Resources\Remove.png" />
-    <Resource Include="Resources\Unicorn.png" />
     <EmbeddedResource Include="..\..\Nupkg\ErikEJ.EntityFrameworkCore.DgmlBuilder\template.dgml">
       <Link>DgmlBuilder\template.dgml</Link>
     </EmbeddedResource>
@@ -195,6 +191,18 @@
     </Content>
     <Content Include="..\lib\efpt80.exe.zip">
       <Link>efpt80.exe.zip</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\lib\efpt90.exe.zip">
+      <Link>efpt90.exe.zip</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\lib\efreveng90.exe.zip">
+      <Link>efreveng90.exe.zip</Link>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="..\lib\T4_900.zip">
+      <Link>T4_900.zip</Link>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <None Include="app.config" />
@@ -277,6 +285,7 @@
     <EmbeddedResource Include="Locales\AboutLocale.fr.resx" />
     <EmbeddedResource Include="Locales\AboutLocale.it.resx" />
     <EmbeddedResource Include="Locales\AboutLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\AboutLocale.ko.resx" />
     <EmbeddedResource Include="Locales\AboutLocale.pl.resx" />
     <EmbeddedResource Include="Locales\AboutLocale.pt-BR.resx" />
     <EmbeddedResource Include="Locales\AboutLocale.ru.resx" />
@@ -288,12 +297,60 @@
       <LastGenOutput>AboutLocale.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.cs.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.en.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.es.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.fr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.it.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.ja.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.ko.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.pl.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.pt-BR.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.ru.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.tr.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.zh-Hant.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.zh-Hans.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Locales\ButtonLocale.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ButtonLocale.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="Locales\CompareLocale.cs.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.de.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.en.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.es.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.it.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\CompareLocale.ko.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.pl.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.pt-BR.resx" />
     <EmbeddedResource Include="Locales\CompareLocale.ru.resx" />
@@ -313,6 +370,7 @@
     <EmbeddedResource Include="Locales\DgmlLocale.fr.resx" />
     <EmbeddedResource Include="Locales\DgmlLocale.it.resx" />
     <EmbeddedResource Include="Locales\DgmlLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\DgmlLocale.ko.resx" />
     <EmbeddedResource Include="Locales\DgmlLocale.pl.resx" />
     <EmbeddedResource Include="Locales\DgmlLocale.pt-BR.resx" />
     <EmbeddedResource Include="Locales\DgmlLocale.ru.resx" />
@@ -323,24 +381,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DgmlLocale.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Locales\MigrationsLocale.cs.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.de.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.en.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.es.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.fr.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.it.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.ja.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.pl.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.pt-BR.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.ru.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.tr.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.zh-Hans.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.zh-Hant.resx" />
-    <EmbeddedResource Include="Locales\MigrationsLocale.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>MigrationsLocale.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.cs.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.de.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.en.resx" />
@@ -348,6 +388,7 @@
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.fr.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.it.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\ModelAnalyzerLocale.ko.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.pl.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.pt-BR.resx" />
     <EmbeddedResource Include="Locales\ModelAnalyzerLocale.ru.resx" />
@@ -365,6 +406,7 @@
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.es.resx" />
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.fr.resx" />
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\ReverseEngineerLocale.ko.resx" />
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.it.resx" />
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.pl.resx" />
     <EmbeddedResource Include="Locales\ReverseEngineerLocale.pt-BR.resx" />
@@ -384,6 +426,7 @@
     <EmbeddedResource Include="Locales\SharedLocale.fr.resx" />
     <EmbeddedResource Include="Locales\SharedLocale.it.resx" />
     <EmbeddedResource Include="Locales\SharedLocale.ja.resx" />
+    <EmbeddedResource Include="Locales\SharedLocale.ko.resx" />
     <EmbeddedResource Include="Locales\SharedLocale.pl.resx" />
     <EmbeddedResource Include="Locales\SharedLocale.pt-BR.resx" />
     <EmbeddedResource Include="Locales\SharedLocale.ru.resx" />
@@ -431,6 +474,10 @@
       <MergeWithCTO>true</MergeWithCTO>
       <LogicalName>VSPackage.jp.Resources</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="VSPackage.ko.resx">
+      <MergeWithCTO>true</MergeWithCTO>
+      <LogicalName>VSPackage.ko.Resources</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="VSPackage.pl.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <LogicalName>VSPackage.pl.Resources</LogicalName>
@@ -470,10 +517,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Dialogs\CompareResultDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Dialogs\EfCoreMigrationsDialog.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -536,72 +579,36 @@
       <IncludeInVSIX>true</IncludeInVSIX>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <VSCTCompile Include="EFCorePowerToolsPackage.cs.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.de.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.en.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.es.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.fr.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.it.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.ja.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.pl.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.pt-BR.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.ru.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.tr.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.zh-Hans.vsct">
-      <ResourceName>Menus.ctmenu</ResourceName>
-    </VSCTCompile>
-    <VSCTCompile Include="EFCorePowerToolsPackage.zh-Hant.vsct">
+    <VSCTCompile Include="EFCorePowerToolsPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AdysTech.CredentialManager" Version="2.6.0" />
     <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
-    <PackageReference Include="Community.VisualStudio.Toolkit.17" Version="17.0.507" />
+    <PackageReference Include="Community.VisualStudio.Toolkit.17" Version="17.0.522" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
     <PackageReference Include="Microsoft.VisualStudio.Data.Framework" Version="17.5.33428.388" />
     <PackageReference Include="Microsoft.VisualStudio.SDK" Version="17.0.32112.339" />
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>17.8.2365</Version>
+      <Version>17.11.414</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf">
-      <Version>1.1.77</Version>
+      <Version>1.1.135</Version>
     </PackageReference>
     <PackageReference Include="MvvmLightLibs">
       <Version>5.4.1.1</Version>
     </PackageReference>
-    <PackageReference Include="NuGet.ProjectModel" Version="6.9.1" />
-    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+    <PackageReference Include="NuGet.ProjectModel" Version="6.11.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.2.0" />
   </ItemGroup>
   <Import Project="..\Shared\Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

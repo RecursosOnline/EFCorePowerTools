@@ -1,5 +1,5 @@
 
-dotnet publish -o bin\Release\net6.0\x64\publish -f net6.0 -r win-x64 -c Release --no-self-contained
+dotnet publish -o bin\Release\net6.0\x64\publish -f net6.0 -c Release --no-self-contained
 
 if %errorlevel% equ 1 goto notbuilt
 
@@ -24,4 +24,3 @@ goto end
 echo Build error
 
 :end
-pause

@@ -5,7 +5,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>efcpt</ToolCommandName>
     <PackageId>ErikEJ.EFCorePowerTools.Cli</PackageId>
-    <Description>Entity Framework Core Power Tools command line tool </Description>
+    <Description>Entity Framework Core Power Tools command line tool</Description>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageVersion>8.0.1</PackageVersion>
     <InformationalVersion>8.0.1</InformationalVersion>
@@ -27,39 +27,26 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\efcpt.7\Extensions\*.cs">
-      <Link>Extensions\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\efcpt.7\HostedServices\*.cs">
-      <Link>HostedServices\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\efcpt.7\Options\*.cs">
-      <Link>Options\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\efcpt.7\Services\*.cs">
-      <Link>Services\%(Filename)%(Extension)</Link>
-    </Compile>
-    <Compile Include="..\efcpt.7\Constants.cs" Link="Constants.cs" />
-    <Compile Include="..\efcpt.7\Program.cs" Link="Program.cs" />
+    <None Remove="efcpt-readme.md" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="..\..\GUI\lib\T4_800.zip" Link="T4_800.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\efcpt.7\efcpt-readme.md" Link="efcpt-readme.md">
+    <Content Include="efcpt-readme.md">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="..\efcpt.7\readme.md" Link="readme.md" Pack="true" PackagePath="\" />
+    <None Include="readme.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Ben.Demystifier" Version="0.4.1" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="NuGet.Protocol" Version="6.9.1" />
-    <PackageReference Include="Spectre.Console" Version="0.48.0" />
-    <PackageReference Include="System.IO.Abstractions" Version="21.0.2" />
+    <PackageReference Include="NuGet.Protocol" Version="6.11.0" />
+    <PackageReference Include="Spectre.Console" Version="0.49.1" />
+    <PackageReference Include="System.IO.Abstractions" Version="21.0.29" />
   </ItemGroup>
 
   <ItemGroup>

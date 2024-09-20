@@ -54,6 +54,7 @@ namespace EFCorePowerTools.Extensions
 
             var assemblyNameExe = assemblyName + ".exe";
             var assemblyNameDll = assemblyName + ".dll";
+            var assemblyNameDacpac = assemblyName + ".dacpac";
 
             var outputPath = await GetOutputPathAsync(project);
 
@@ -70,6 +71,11 @@ namespace EFCorePowerTools.Extensions
             if (File.Exists(Path.Combine(outputPath, assemblyNameDll)))
             {
                 return Path.Combine(outputPath, assemblyNameDll);
+            }
+
+            if (File.Exists(Path.Combine(outputPath, assemblyNameDacpac)))
+            {
+                return Path.Combine(outputPath, assemblyNameDacpac);
             }
 
             return null;
@@ -100,6 +106,27 @@ namespace EFCorePowerTools.Extensions
 #pragma warning restore S2583 // Conditionally executed code should be reachable
 
             return result.OrderBy(s => s).ToList();
+        }
+
+        public static string GetCliConfigFile(this Project project)
+        {
+            ThreadHelper.ThrowIfNotOnUIThread();
+
+            var projectPath = Path.GetDirectoryName(project.FullPath);
+
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                return null;
+            }
+
+            var path = Path.Combine(projectPath,  RevEng.Common.Constants.ConfigFileName);
+
+            if (File.Exists(path))
+            {
+                return path;
+            }
+
+            return null;
         }
 
         public static string GetRenamingPath(this Project project, string optionsPath, bool navigationsFile = false)
@@ -181,6 +208,12 @@ namespace EFCorePowerTools.Extensions
             return version;
         }
 
+        public static async Task<bool> CanUseReverseEngineerAsync(this Project project)
+        {
+            return project.IsCSharpProject()
+                && (await project.IsNet60OrHigherAsync() || await project.IsNetStandardAsync());
+        }
+
         public static bool IsCSharpProject(this Project project)
         {
             if (project == null)
@@ -206,6 +239,17 @@ namespace EFCorePowerTools.Extensions
             return project.IsCapabilityMatch("CSharp & CPS");
         }
 
+        public static bool IsSqlDatabaseProject(this Project project)
+        {
+            if (project == null)
+            {
+                return false;
+            }
+
+            return project.IsMsBuildSqlProjProject()
+                || project.FullPath.EndsWith(".sqlproj", StringComparison.OrdinalIgnoreCase);
+        }
+
         public static bool IsMsBuildSqlProjProject(this Project project)
         {
             if (project == null)
@@ -220,7 +264,10 @@ namespace EFCorePowerTools.Extensions
         {
             var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
 
-            return IsNet60(targetFrameworkMonikers) || IsNet70(targetFrameworkMonikers) || IsNet80(targetFrameworkMonikers);
+            return IsNet60(targetFrameworkMonikers)
+                || IsNet70(targetFrameworkMonikers)
+                || IsNet80(targetFrameworkMonikers)
+                || IsNet90(targetFrameworkMonikers);
         }
 
         public static async Task<bool> IsNet70OnlyAsync(this Project project)
@@ -228,20 +275,6 @@ namespace EFCorePowerTools.Extensions
             var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
 
             return IsNet70(targetFrameworkMonikers);
-        }
-
-        public static async Task<bool> IsNet80Async(this Project project)
-        {
-            var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
-
-            return IsNet80(targetFrameworkMonikers);
-        }
-
-        public static async Task<bool> IsNet90Async(this Project project)
-        {
-            var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
-
-            return IsNet90(targetFrameworkMonikers);
         }
 
         public static async Task<bool> IsNetStandardAsync(this Project project)
@@ -419,6 +452,20 @@ namespace EFCorePowerTools.Extensions
             }
 
             return new Tuple<bool, string>(hasDesign, coreVersion);
+        }
+
+        private static async Task<bool> IsNet80Async(this Project project)
+        {
+            var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
+
+            return IsNet80(targetFrameworkMonikers);
+        }
+
+        private static async Task<bool> IsNet90Async(this Project project)
+        {
+            var targetFrameworkMonikers = await GetTargetFrameworkMonikersAsync(project);
+
+            return IsNet90(targetFrameworkMonikers);
         }
 
         private static bool IsNet60(string targetFrameworkMonikers)

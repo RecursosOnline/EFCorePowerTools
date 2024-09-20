@@ -44,6 +44,10 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                     revengVersion = "8";
                     break;
 
+                case CodeGenerationMode.EFCore9:
+                    revengVersion = "9";
+                    break;
+
                 default:
                     throw new NotSupportedException("Unsupported code generation mode");
             }
@@ -109,7 +113,7 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
                 OptionsPath = options.OptionsPath,
                 MergeDacpacs = AdvancedOptions.Instance.MergeDacpacs,
                 UseLegacyResultSetDiscovery = AdvancedOptions.Instance.UseLegacyResultSetDiscovery,
-                UseAsyncCalls = AdvancedOptions.Instance.PreferAsyncCalls,
+                UseAsyncCalls = options.UseAsyncStoredProcedureCalls,
                 PreserveCasingWithRegex = options.PreserveCasingWithRegex,
                 UseDateOnlyTimeOnly = options.UseDateOnlyTimeOnly,
                 UseSchemaNamespaces = options.UseSchemaNamespaces,
@@ -133,16 +137,38 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             return await GetTablesInternalAsync(arguments);
         }
 
-        public async Task<string> GetDgmlAsync(string connectionString, DatabaseType databaseType, List<string> schemaList)
+        public async Task<string> GetDiagramAsync(string connectionString, DatabaseType databaseType, List<string> schemaList, bool erDiagram)
         {
-            var arguments = "dgml " + ((int)databaseType).ToString() + " \"" + connectionString.Replace("\"", "\\\"") + "\" \"" + string.Join(",", schemaList) + "\"";
+            var option = erDiagram ? "erdiagram " : "dgml ";
+
+            var arguments = option + ((int)databaseType).ToString() + " \"" + connectionString.Replace("\"", "\\\"") + "\" \"" + string.Join(",", schemaList) + "\"";
 
             if (schemaList.Count == 0)
             {
-                arguments = "dgml " + ((int)databaseType).ToString() + " \"" + connectionString.Replace("\"", "\\\"") + "\"";
+                arguments = option + ((int)databaseType).ToString() + " \"" + connectionString.Replace("\"", "\\\"") + "\"";
             }
 
-            var filePath = await GetDgmlInternalAsync(arguments);
+            var filePath = await GetDiagramInternalAsync(arguments);
+
+            return filePath;
+        }
+
+        public async Task<string> GetReportPathAsync(string path, bool isConnectionString)
+        {
+            var option = isConnectionString ? "dacpacreportextract " : "dacpacreport ";
+
+            var arguments = option + " \"" + path.Replace("\"", "\\\"") + "\"";
+
+            var filePath = await GetDiagramInternalAsync(arguments);
+
+            return filePath;
+        }
+
+        public async Task<string> GetDabConfigPathAsync(string optionsPath, string connectionString)
+        {
+            var arguments = "dabbuilder " + " \"" + optionsPath.Replace("\"", "\\\"") + "\" " + " \"" + connectionString.Replace("\"", "\\\"") + "\" ";
+
+            var filePath = await GetDiagramInternalAsync(arguments);
 
             return filePath;
         }
@@ -152,13 +178,22 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
             return await ProcessLauncher.RunProcessAsync(startInfo);
         }
 
-        private async Task<string> GetDgmlInternalAsync(string arguments)
+        private async Task<string> GetDiagramInternalAsync(string arguments)
         {
             var startInfo = await CreateStartInfoAsync(arguments);
 
+            try
+            {
+                File.WriteAllText(Path.Combine(Path.GetTempPath(), "efrevengparams.txt"), startInfo.Arguments, Encoding.UTF8);
+            }
+            catch
+            {
+                // Ignore
+            }
+
             var standardOutput = await RunProcessAsync(startInfo);
 
-            return resultDeserializer.BuildDgmlResult(standardOutput);
+            return resultDeserializer.BuildDiagramResult(standardOutput);
         }
 
         private async Task<List<TableModel>> GetTablesInternalAsync(string arguments)
@@ -174,7 +209,8 @@ namespace EFCorePowerTools.Handlers.ReverseEngineer
         {
             string version = "6.0";
 
-            if (codeGenerationMode == CodeGenerationMode.EFCore8)
+            if (codeGenerationMode == CodeGenerationMode.EFCore8
+                || codeGenerationMode == CodeGenerationMode.EFCore9)
             {
                 version = "8.0";
             }

@@ -46,6 +46,17 @@ namespace RevEng.Common
             }
         }
 
+        public static HashSet<DatabaseType> GetDabProviders()
+            {
+            return new HashSet<DatabaseType>
+            {
+                DatabaseType.SQLServer,
+                DatabaseType.SQLServerDacpac,
+                DatabaseType.Npgsql,
+                DatabaseType.Mysql,
+            };
+        }
+
         public static string CreateReadme(ReverseEngineerCommandOptions commandOptions, CodeGenerationMode codeGenerationMode, string redactedConnectionString)
         {
             if (commandOptions == null)
@@ -88,14 +99,17 @@ namespace RevEng.Common
 
             if (databaseType == DatabaseType.SQLServer || databaseType == DatabaseType.SQLServerDacpac)
             {
-                var pkgVersion = "7.0.17";
+                var pkgVersion = "7.0.20";
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.28";
+                        pkgVersion = "6.0.33";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.3";
+                        pkgVersion = "8.0.8";
+                        break;
+                    case CodeGenerationMode.EFCore9:
+                        pkgVersion = "9.0.0-rc.1.24451.1";
                         break;
                 }
 
@@ -130,7 +144,7 @@ namespace RevEng.Common
                             break;
 
                         case CodeGenerationMode.EFCore8:
-                            pkgVersion = "8.0.0";
+                            pkgVersion = "8.0.1";
                             break;
                     }
 
@@ -157,7 +171,8 @@ namespace RevEng.Common
                             break;
                     }
 
-                    if (codeGenerationMode == CodeGenerationMode.EFCore8)
+                    if (codeGenerationMode == CodeGenerationMode.EFCore8
+                        || codeGenerationMode == CodeGenerationMode.EFCore9)
                     {
                         packages.Add(new NuGetPackage
                         {
@@ -183,11 +198,11 @@ namespace RevEng.Common
 
                 if (useDateOnlyTimeOnly)
                 {
-                    pkgVersion = "7.0.8";
+                    pkgVersion = "7.0.10";
                     switch (codeGenerationMode)
                     {
                         case CodeGenerationMode.EFCore6:
-                            pkgVersion = "6.0.8";
+                            pkgVersion = "6.0.10";
                             break;
                     }
 
@@ -210,7 +225,7 @@ namespace RevEng.Common
                     packages.Add(new NuGetPackage
                     {
                         PackageId = "Dapper",
-                        Version = "2.1.28",
+                        Version = "2.1.35",
                         DatabaseTypes = new List<DatabaseType> { DatabaseType.SQLServer, DatabaseType.SQLServerDacpac },
                         IsMainProviderPackage = false,
                         UseMethodName = null,
@@ -220,14 +235,17 @@ namespace RevEng.Common
 
             if (databaseType == DatabaseType.SQLite)
             {
-                var pkgVersion = "7.0.17";
+                var pkgVersion = "7.0.20";
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.28";
+                        pkgVersion = "6.0.33";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.3";
+                        pkgVersion = "8.0.8";
+                        break;
+                    case CodeGenerationMode.EFCore9:
+                        pkgVersion = "9.0.0-rc.1.24451.1";
                         break;
                 }
 
@@ -271,10 +289,13 @@ namespace RevEng.Common
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.22";
+                        pkgVersion = "6.0.29";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.0.0";
+                        pkgVersion = "8.0.4";
+                        break;
+                    case CodeGenerationMode.EFCore9:
+                        pkgVersion = "9.0.0-rc.1";
                         break;
                 }
 
@@ -318,7 +339,7 @@ namespace RevEng.Common
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.0.2";
+                        pkgVersion = "6.0.3";
                         break;
 
                     case CodeGenerationMode.EFCore8:
@@ -350,14 +371,14 @@ namespace RevEng.Common
 
             if (databaseType == DatabaseType.Oracle)
             {
-                var pkgVersion = "7.21.12";
+                var pkgVersion = "7.21.13";
                 switch (codeGenerationMode)
                 {
                     case CodeGenerationMode.EFCore6:
-                        pkgVersion = "6.21.120";
+                        pkgVersion = "6.21.150";
                         break;
                     case CodeGenerationMode.EFCore8:
-                        pkgVersion = "8.21.121";
+                        pkgVersion = "8.23.50";
                         break;
                 }
 
@@ -378,6 +399,10 @@ namespace RevEng.Common
                 {
                     case CodeGenerationMode.EFCore6:
                         pkgVersion = "9.1.1";
+                        break;
+
+                    case CodeGenerationMode.EFCore8:
+                        pkgVersion = "11.0.0";
                         break;
                 }
 

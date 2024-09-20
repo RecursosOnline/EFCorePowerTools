@@ -82,6 +82,40 @@ namespace RevEng.Core
                 {
                     table.Indexes.Remove(index);
                 }
+
+                var constraintsToBeRemoved = new List<DatabaseUniqueConstraint>();
+                foreach (var constraint in table.UniqueConstraints)
+                {
+                    foreach (var column in constraint.Columns)
+                    {
+                        if (excludedColumns.Contains(column))
+                        {
+                            constraintsToBeRemoved.Add(constraint);
+                        }
+                    }
+                }
+
+                foreach (var constraint in constraintsToBeRemoved)
+                {
+                    table.UniqueConstraints.Remove(constraint);
+                }
+
+                var fksToBeRemoved = new List<DatabaseForeignKey>();
+                foreach (var fk in table.ForeignKeys)
+                {
+                    foreach (var column in fk.Columns)
+                    {
+                        if (excludedColumns.Contains(column))
+                        {
+                            fksToBeRemoved.Add(fk);
+                        }
+                    }
+                }
+
+                foreach (var fk in fksToBeRemoved)
+                {
+                    table.ForeignKeys.Remove(fk);
+                }
             }
 
             return base.VisitTable(modelBuilder, table);

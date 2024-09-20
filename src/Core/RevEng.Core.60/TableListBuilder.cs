@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Scaffolding.Metadata;
 using RevEng.Common;
 using RevEng.Core.Abstractions;
 using RevEng.Core.Abstractions.Model;
-using RevEng.Core.Mermaid;
+using RevEng.Core.Diagram;
 
 namespace RevEng.Core
 {
@@ -76,7 +76,9 @@ namespace RevEng.Core
         {
             var result = new List<TableModel>();
 
-            if (databaseType != DatabaseType.SQLServer && databaseType != DatabaseType.SQLServerDacpac)
+            if (databaseType != DatabaseType.SQLServer
+                && databaseType != DatabaseType.SQLServerDacpac
+                && databaseType != DatabaseType.Npgsql)
             {
                 return result;
             }
@@ -101,7 +103,8 @@ namespace RevEng.Core
         {
             var result = new List<TableModel>();
 
-            if (databaseType != DatabaseType.SQLServer)
+            if (databaseType != DatabaseType.SQLServer
+                && databaseType != DatabaseType.SQLServerDacpac)
             {
                 return result;
             }
